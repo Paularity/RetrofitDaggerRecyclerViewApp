@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#e3e3e3"
+    tools:context=".Fragments.HomeFragment"
+    android:padding="15dp"
+    >
+
+    <TextView
+        android:id="@+id/selectedTxt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="List of Data:"
+        android:gravity="center"
+        android:textSize="20dp"
+        android:textColor="@color/colorPrimaryDark"
+        android:padding="15dp"
+        />
+
+    <ProgressBar
+        android:id="@+id/responseProgress"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:max="100" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerview_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>
