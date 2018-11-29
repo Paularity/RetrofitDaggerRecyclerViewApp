@@ -104,7 +104,6 @@ public class HomeFragment extends Fragment
         responseProgress.setVisibility(View.GONE);
 
         adapter = new CommitmentRecyclerViewAdapter( getActivity(), results );
-        //RecyclerView.LayoutManager myLayoutManager = new GridLayoutManager(this,3);
         commitmentApiHelper.getResultList(getActivity(), results, rv_layout, adapter, responseProgress);
     }
 }
