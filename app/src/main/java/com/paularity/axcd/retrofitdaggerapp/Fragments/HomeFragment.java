@@ -1,32 +1,20 @@
 package com.paularity.axcd.retrofitdaggerapp.Fragments;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.ProgressDialog;
-import android.content.Context;
-import android.content.res.ColorStateList;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.LinearLayout;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.Spinner;
 
 import com.paularity.axcd.retrofitdaggerapp.Adapters.CommitmentRecyclerViewAdapter;
 import com.paularity.axcd.retrofitdaggerapp.Api.CommitmentApi;
@@ -34,23 +22,19 @@ import com.paularity.axcd.retrofitdaggerapp.Dagger.MyApplication;
 import com.paularity.axcd.retrofitdaggerapp.Helpers.CommitmentApiHelper;
 import com.paularity.axcd.retrofitdaggerapp.Models.Commitment;
 import com.paularity.axcd.retrofitdaggerapp.Models.Result;
-import com.paularity.axcd.retrofitdaggerapp.Models.WebService;
 import com.paularity.axcd.retrofitdaggerapp.R;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.Collections;
 
 import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import io.reactivex.disposables.CompositeDisposable;
 import retrofit2.Retrofit;
+
+import static android.view.View.GONE;
 
 public class HomeFragment extends Fragment
 {
@@ -69,15 +53,20 @@ public class HomeFragment extends Fragment
     @BindView(R.id.recyclerview_layout)
     RecyclerView rv_layout;
 
-    @BindView(R.id.selectedTxt)
-    TextView textView;
-
     @BindView(R.id.responseProgress)
     ProgressBar responseProgress;
+
+    @BindView(R.id.spinner)
+    Spinner spinner;
 
     ArrayList<Result> results = new ArrayList<>();
 
     CommitmentRecyclerViewAdapter adapter;
+
+    ArrayList<Integer> total_page = new ArrayList<>();
+    ArrayAdapter<Integer> page_adapter;
+
+    int current_page = 1;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -92,11 +81,35 @@ public class HomeFragment extends Fragment
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState)
     {
         super.onViewCreated(view, savedInstanceState);
-
-        initList();
+        paginate();
     }
 
-    private void initList()
+    private void paginate()
+    {
+        total_page.add(1);
+        total_page.add(2);
+
+        page_adapter = new ArrayAdapter<Integer>(getActivity(), android.R.layout.simple_spinner_dropdown_item, total_page);
+        spinner.setAdapter(page_adapter);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id)
+            {
+                current_page = total_page.get(position);
+                fetchAllData();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView)
+            {
+                current_page = 1;
+                fetchAllData();
+            }
+
+        });
+    }
+
+    private void fetchAllData()
     {
         responseProgress.getIndeterminateDrawable().setColorFilter(
                 getResources().getColor(R.color.colorPrimaryDark),
@@ -104,6 +117,15 @@ public class HomeFragment extends Fragment
         responseProgress.setVisibility(View.GONE);
 
         adapter = new CommitmentRecyclerViewAdapter( getActivity(), results );
-        commitmentApiHelper.getResultList(getActivity(), results, rv_layout, adapter, responseProgress);
+        commitmentApiHelper.getResultList(current_page, results, responseProgress, adapter, getActivity(), rv_layout);
     }
+
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+        total_page.clear();
+    }
+
+
 }

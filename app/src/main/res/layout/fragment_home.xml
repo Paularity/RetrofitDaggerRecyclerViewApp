@@ -4,22 +4,29 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#e3e3e3"
     tools:context=".Fragments.HomeFragment"
-    android:padding="15dp"
+    android:id="@+id/rootLayout"
     >
-
-    <TextView
-        android:id="@+id/selectedTxt"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="List of Data:"
-        android:gravity="center"
-        android:textSize="20dp"
-        android:textColor="@color/colorPrimaryDark"
-        android:padding="15dp"
-        />
-
+        android:background="@color/colorAccent"
+        android:orientation="horizontal"
+        android:padding="20dp"
+        >
+        <TextView
+            android:id="@+id/txt_spinner"
+            android:text="Select page"
+            android:textColor="@color/light"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <Spinner
+            android:backgroundTint="@color/light"
+            android:id="@+id/spinner"
+            android:layout_marginLeft="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
     <ProgressBar
         android:id="@+id/responseProgress"
         android:layout_width="fill_parent"
@@ -31,5 +38,7 @@
         android:id="@+id/recyclerview_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+
+
 
 </LinearLayout>

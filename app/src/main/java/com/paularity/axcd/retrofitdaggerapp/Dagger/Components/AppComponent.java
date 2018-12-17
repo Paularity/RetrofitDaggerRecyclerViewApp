@@ -24,4 +24,6 @@ public interface AppComponent
     void inject(HomeFragment fragment);
     void inject(DetailsFragment fragment);
     void inject(CommitmentApiHelper helper);
+
+
 }

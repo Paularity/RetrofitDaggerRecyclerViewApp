@@ -15,11 +15,20 @@ import com.paularity.axcd.retrofitdaggerapp.Api.CommitmentApi;
 import com.paularity.axcd.retrofitdaggerapp.Dagger.MyApplication;
 import com.paularity.axcd.retrofitdaggerapp.Models.Commitment;
 import com.paularity.axcd.retrofitdaggerapp.Models.Result;
+import com.paularity.axcd.retrofitdaggerapp.R;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.Scheduler;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.observers.DisposableCompletableObserver;
+import io.reactivex.observers.DisposableSingleObserver;
+import io.reactivex.schedulers.Schedulers;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -67,41 +76,38 @@ public class CommitmentApiHelper
 
     }
 
-    public void getResultList(final Context context, final ArrayList<Result> results, final RecyclerView recyclerView, final CommitmentRecyclerViewAdapter adapter, final ProgressBar progressBar)
+    public void getResultList(final int current_page, final ArrayList<Result> results, final ProgressBar responseProgress, final CommitmentRecyclerViewAdapter adapter, final Context context, final RecyclerView rv_layout )
     {
-        progressBar.setVisibility(View.VISIBLE);
+        responseProgress.setVisibility(View.VISIBLE);
 
         myRetro.create(CommitmentApi.class) //get Data from client
-                .getCommitment()
-                .enqueue(new Callback<Commitment>()
+                .getCommitment(current_page)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableSingleObserver<Commitment>()
                 {
                     @Override
-                    public void onResponse(Call<Commitment> call, Response<Commitment> response)
+                    public void onSuccess(Commitment commitments)
                     {
-                        commitment = response.body();
-                        if( response.isSuccessful() )
+                        results.clear();
+                        for( int i = 0; commitments.getResults().size() > i; i++ )
                         {
-                            results.clear();
-                            for( int i = 0; commitment.getCount() > i; i++ )
-                            {
-                                results.add(commitment.getResults().get(i));
-                            }
-                            RecyclerView.LayoutManager myLayoutManager = new LinearLayoutManager( context );
-                            recyclerView.setLayoutManager(myLayoutManager);
-                            recyclerView.setAdapter(adapter);
-                            adapter.notifyDataSetChanged();
-                            progressBar.setVisibility(GONE);
+                            results.add(commitments.getResults().get(i));
                         }
 
+                        Collections.reverse(results);
+                        RecyclerView.LayoutManager myLayoutManager = new LinearLayoutManager( context );
+                        rv_layout.setLayoutManager(myLayoutManager);
+                        rv_layout.setAdapter(adapter);
+                        adapter.notifyDataSetChanged();
+                        responseProgress.setVisibility(GONE);
                     }
 
                     @Override
-                    public void onFailure(Call<Commitment> call, Throwable t)
+                    public void onError(Throwable e)
                     {
-                        t.printStackTrace();
-                        progressBar.setVisibility(GONE);
+                        e.printStackTrace();
                     }
-
                 });
 
     }
@@ -116,18 +122,21 @@ public class CommitmentApiHelper
         {
             myRetro.create(CommitmentApi.class)
                     .insertData("", title, description)
-                    .enqueue(new Callback<Void>()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeWith(new DisposableCompletableObserver()
                     {
                         @Override
-                        public void onResponse(Call<Void> call, Response<Void> response)
+                        public void onComplete()
                         {
-                            getResponseCode(String.valueOf(response.code()), "Data", "added");
+                            getResponseCode(String.valueOf(200), "Data", "added");
                         }
 
                         @Override
-                        public void onFailure(Call<Void> call, Throwable t)
+                        public void onError(Throwable e)
                         {
-                            t.printStackTrace();
+                            getResponseCode(String.valueOf(404), "Data", "added");
+                            e.printStackTrace();
                         }
                     });
         }
@@ -147,18 +156,21 @@ public class CommitmentApiHelper
         {
             myRetro.create(CommitmentApi.class)
                     .updateById(Integer.parseInt(id), title.toString(), description.toString())
-                    .enqueue(new Callback<Void>()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeWith(new DisposableCompletableObserver()
                     {
                         @Override
-                        public void onResponse(Call<Void> call, Response<Void> response)
+                        public void onComplete()
                         {
-                            getResponseCode(String.valueOf(response.code()), "Data", "updated");
+                            getResponseCode(String.valueOf(200), "Data", "updated");
                         }
 
                         @Override
-                        public void onFailure(Call<Void> call, Throwable t)
+                        public void onError(Throwable e)
                         {
-                            t.printStackTrace();
+                            getResponseCode(String.valueOf(404), "Data", "updated");
+                            e.printStackTrace();
                         }
                     });
         }
@@ -178,18 +190,21 @@ public class CommitmentApiHelper
         {
             myRetro.create(CommitmentApi.class)
                     .deleteById(Integer.parseInt(id))
-                    .enqueue(new Callback<Void>()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeWith(new DisposableCompletableObserver()
                     {
                         @Override
-                        public void onResponse(Call<Void> call, Response<Void> response)
+                        public void onComplete()
                         {
-                            getResponseCode(String.valueOf(response.code()), "Data", "deleted");
+                            getResponseCode(String.valueOf(200), "Data", "deleted");
                         }
 
                         @Override
-                        public void onFailure(Call<Void> call, Throwable t)
+                        public void onError(Throwable e)
                         {
-                            t.printStackTrace();
+                            getResponseCode(String.valueOf(404), "Data", "deleted");
+                            e.printStackTrace();
                         }
                     });
         }

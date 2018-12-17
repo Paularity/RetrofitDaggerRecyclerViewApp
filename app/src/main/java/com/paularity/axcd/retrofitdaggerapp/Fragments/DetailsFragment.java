@@ -73,14 +73,17 @@ public class DetailsFragment extends Fragment
         {
             case R.id.btn_submit:
                 commitmentApiHelper.insertData(title, description);
+                this.edt_title.setText(""); this.edt_desc.setText("");
                 break;
 
             case R.id.btn_update:
                 commitmentApiHelper.updateData(edit_id, edit_title, edit_description );
+                this.edt_id_edit.setText(""); this.edt_title_edit.setText(""); this.edt_desc_edit.setText("");
                 break;
 
             case R.id.btn_delete:
                 commitmentApiHelper.deleteData( delete_id );
+                this.edt_id.setText("");
                 break;
 
             default:

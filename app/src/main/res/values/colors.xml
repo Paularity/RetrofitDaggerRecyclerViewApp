@@ -5,7 +5,7 @@
     <color name="colorAccent">#D81B60</color>
 
     <color name="light">#FFFFFF</color>
-    <color name="disabled">#e3e3e3</color>
+    <color name="disabled">#9e9e9e</color>
     <color name="dark">#202020</color>
     <color name="darker">#000000</color>
     <color name="success">#5eff00</color>

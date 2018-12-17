@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.paularity.axcd.retrofitdaggerapp.Models.Commitment;
 import com.paularity.axcd.retrofitdaggerapp.Models.Result;
@@ -34,9 +35,12 @@ public class CommitmentRecyclerViewAdapter extends RecyclerView.Adapter<Commitme
         @BindView(R.id.txt_desc)
         TextView txt_desc;
 
+        public View view;
+
         public MyViewHolder(View view)
         {
             super(view);
+            this.view = view;
             ButterKnife.bind(this, view);
         }
     }
@@ -57,11 +61,22 @@ public class CommitmentRecyclerViewAdapter extends RecyclerView.Adapter<Commitme
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MyViewHolder holder, int i)
+    public void onBindViewHolder(@NonNull MyViewHolder holder, final int i)
     {
         holder.txt_id.setText( String.valueOf( results.get(i).getId() ) );
         holder.txt_title.setText( String.valueOf( results.get(i).getTitle() ) );
         holder.txt_desc.setText( String.valueOf( results.get(i).getDescription() ) );
+
+        holder.view.setOnLongClickListener(new View.OnLongClickListener()
+        {
+            @Override
+            public boolean onLongClick(View v)
+            {
+                Toast.makeText(context, results.get(i).getTitle() + " is clicked.", Toast.LENGTH_SHORT ).show();
+                return false;
+            }
+        });
+
     }
 
     @Override

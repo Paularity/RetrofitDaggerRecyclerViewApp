@@ -2,6 +2,7 @@ package com.paularity.axcd.retrofitdaggerapp.Dagger.Modules;
 
 import android.content.Context;
 
+import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import com.paularity.axcd.retrofitdaggerapp.Helpers.AuthInterceptor;
 import com.paularity.axcd.retrofitdaggerapp.Helpers.CacheInterceptor;
 import com.paularity.axcd.retrofitdaggerapp.Helpers.Utils;
@@ -75,6 +76,7 @@ public class NetworkModule
         return new Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .client(client.build())
                 .build();
     }

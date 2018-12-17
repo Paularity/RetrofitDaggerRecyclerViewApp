@@ -17,10 +17,10 @@ public class Commitment
     private int count;
 
     @SerializedName("next")
-    private int next;
+    private String next;
 
     @SerializedName("previous")
-    private int previous;
+    private String previous;
 
     @SerializedName("results")
     private ArrayList<Result> results;
@@ -31,7 +31,7 @@ public class Commitment
         this.context = context;
     }
 
-    public Commitment(int count, int next, int previous, ArrayList<Result> results)
+    public Commitment(int count, String next, String previous, ArrayList<Result> results)
     {
         this.count = count;
         this.next = next;
@@ -49,22 +49,22 @@ public class Commitment
         this.count = count;
     }
 
-    public int getNext()
+    public String getNext()
     {
         return next;
     }
 
-    public void setNext(int next)
+    public void setNext(String next)
     {
         this.next = next;
     }
 
-    public int getPrevious()
+    public String getPrevious()
     {
         return previous;
     }
 
-    public void setPrevious(int previous)
+    public void setPrevious(String previous)
     {
         this.previous = previous;
     }
