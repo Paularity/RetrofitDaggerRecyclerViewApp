@@ -26,6 +26,7 @@ import javax.inject.Inject;
 
 import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Predicate;
 import io.reactivex.observers.DisposableCompletableObserver;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
@@ -76,12 +77,13 @@ public class CommitmentApiHelper
 
     }
 
-    public void getResultList(final int current_page, final ArrayList<Result> results, final ProgressBar responseProgress, final CommitmentRecyclerViewAdapter adapter, final Context context, final RecyclerView rv_layout )
+    public void getResultList(final ArrayList<Result> results, final ProgressBar responseProgress, final CommitmentRecyclerViewAdapter adapter, final Context context, final RecyclerView rv_layout)
     {
         responseProgress.setVisibility(View.VISIBLE);
 
+        //get first all items in each pages
         myRetro.create(CommitmentApi.class) //get Data from client
-                .getCommitment(current_page)
+                .getCommitment(1)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(new DisposableSingleObserver<Commitment>()
@@ -89,18 +91,45 @@ public class CommitmentApiHelper
                     @Override
                     public void onSuccess(Commitment commitments)
                     {
-                        results.clear();
-                        for( int i = 0; commitments.getResults().size() > i; i++ )
+                        float total_page_size = (commitments.getCount() > 10) ? (float)(commitments.getCount() / 10.0) : 1;
+
+                        int page_size = (int) Math.ceil(total_page_size);
+
+                        Log.e( "Total Page ", String.valueOf(page_size));
+                        for( int i=1; i <= page_size; i++ )
                         {
-                            results.add(commitments.getResults().get(i));
+                            //get each item for each page
+                            myRetro.create(CommitmentApi.class) //get Data from client
+                                    .getCommitment(i)
+                                    .subscribeOn(Schedulers.io())
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribeWith(new DisposableSingleObserver<Commitment>()
+                                    {
+                                        @Override
+                                        public void onSuccess(Commitment commitments)
+                                        {
+                                            Log.e( "Next Page", String.valueOf(commitments.getNext()) );
+                                            for( int i = 0; commitments.getResults().size() > i; i++ )
+                                            {
+                                                results.add(commitments.getResults().get(i));
+                                            }
+
+                                            RecyclerView.LayoutManager myLayoutManager = new LinearLayoutManager( context );
+                                            rv_layout.setLayoutManager(myLayoutManager);
+                                            rv_layout.setAdapter(adapter);
+                                            adapter.notifyDataSetChanged();
+                                            responseProgress.setVisibility(GONE);
+                                        }
+
+                                        @Override
+                                        public void onError(Throwable e)
+                                        {
+                                            e.printStackTrace();
+                                        }
+                                    });
                         }
 
-                        Collections.reverse(results);
-                        RecyclerView.LayoutManager myLayoutManager = new LinearLayoutManager( context );
-                        rv_layout.setLayoutManager(myLayoutManager);
-                        rv_layout.setAdapter(adapter);
-                        adapter.notifyDataSetChanged();
-                        responseProgress.setVisibility(GONE);
+
                     }
 
                     @Override
@@ -109,7 +138,6 @@ public class CommitmentApiHelper
                         e.printStackTrace();
                     }
                 });
-
     }
 
     public void insertData(String title, String description)

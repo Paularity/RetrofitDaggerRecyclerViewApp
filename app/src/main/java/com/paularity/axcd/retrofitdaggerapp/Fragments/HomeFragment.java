@@ -56,17 +56,9 @@ public class HomeFragment extends Fragment
     @BindView(R.id.responseProgress)
     ProgressBar responseProgress;
 
-    @BindView(R.id.spinner)
-    Spinner spinner;
-
     ArrayList<Result> results = new ArrayList<>();
 
     CommitmentRecyclerViewAdapter adapter;
-
-    ArrayList<Integer> total_page = new ArrayList<>();
-    ArrayAdapter<Integer> page_adapter;
-
-    int current_page = 1;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -81,32 +73,14 @@ public class HomeFragment extends Fragment
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState)
     {
         super.onViewCreated(view, savedInstanceState);
-        paginate();
     }
 
-    private void paginate()
+    @Override
+    public void onResume()
     {
-        total_page.add(1);
-        total_page.add(2);
-
-        page_adapter = new ArrayAdapter<Integer>(getActivity(), android.R.layout.simple_spinner_dropdown_item, total_page);
-        spinner.setAdapter(page_adapter);
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id)
-            {
-                current_page = total_page.get(position);
-                fetchAllData();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parentView)
-            {
-                current_page = 1;
-                fetchAllData();
-            }
-
-        });
+        super.onResume();
+        results.clear();
+        fetchAllData();
     }
 
     private void fetchAllData()
@@ -117,14 +91,15 @@ public class HomeFragment extends Fragment
         responseProgress.setVisibility(View.GONE);
 
         adapter = new CommitmentRecyclerViewAdapter( getActivity(), results );
-        commitmentApiHelper.getResultList(current_page, results, responseProgress, adapter, getActivity(), rv_layout);
+
+        commitmentApiHelper.getResultList(results, responseProgress, adapter, getActivity(), rv_layout);
     }
 
     @Override
     public void onPause()
     {
         super.onPause();
-        total_page.clear();
+        results.clear();
     }
 
 
